@@ -10,11 +10,10 @@ use Override;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
- * @deprecated %{VERSION}
  * @internal
  */
-#[CoversClass(PhpDocBlock::class)]
-final class PhpDocBlockTest extends TestCase {
+#[CoversClass(PhpClassMarkdown::class)]
+final class PhpClassMarkdownTest extends TestCase {
     public function testInvoke(): void {
         $content  = <<<'PHP'
         <?php declare(strict_types = 1);
@@ -37,9 +36,9 @@ final class PhpDocBlockTest extends TestCase {
             Path::normalize(self::getTempFile($content)->getPathname()),
             false,
         );
-        $factory  = new PhpDocBlock(
+        $factory  = new PhpClassMarkdown(
             $this->app()->make(LinkFactory::class),
-            new PhpClass(),
+            new PhpClassComment(new PhpClass()),
         );
         $metadata = $factory($file);
 
@@ -56,7 +55,7 @@ final class PhpDocBlockTest extends TestCase {
 
     public function testInvokeEmpty(): void {
         $file     = new File(Path::normalize(__FILE__), false);
-        $factory  = new PhpDocBlock($this->app()->make(LinkFactory::class), new PhpClass());
+        $factory  = new PhpClassMarkdown($this->app()->make(LinkFactory::class), new PhpClassComment(new PhpClass()));
         $metadata = $factory($file);
 
         self::assertNotNull($metadata);
@@ -65,9 +64,9 @@ final class PhpDocBlockTest extends TestCase {
 
     public function testInvokeNotPhp(): void {
         $file     = new File(Path::normalize(__FILE__), false);
-        $factory  = new PhpDocBlock(
+        $factory  = new PhpClassMarkdown(
             $this->app()->make(LinkFactory::class),
-            new class() extends PhpClass {
+            new class(new PhpClass()) extends PhpClassComment {
                 #[Override]
                 public function __invoke(File $file): mixed {
                     return null;
